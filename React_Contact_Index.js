@@ -2,71 +2,112 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import './style.css';
 
-//we load the Hook tool using useState so we can use the state tool outside of classes, then we create an function that allows us to add people to the list and serves as the source of our list
-
-function AddPersonForm(props) { 
+function AddPersonForm(props) {
   const [ person, setPerson ] = useState('');
+  const [ address, setAddress] = useState('');
+  const [ phone, setPhone] = useState('');
     
   function handleChange(e) {
     setPerson(e.target.value);
   }
   
-  // the value here will be taken from the input in the return section
+  function handleAddChange(e) {
+    setAddress(e.target.value);
+  }
+  
+  function handlePnumChange(e) {
+    setPhone(e.target.value);
+  }
+
+  function addPerson() {
+    props.addPerson(person)
+  }
+
+  function addAddress() {
+    props.addAddress(address)
+  }
+
+  function addNumber() {
+    props.addNumber(phone)
+  }
 
   function handleSubmit(e) {
-    if(person !== '') {
-      props.handleSubmit(person);
-      setPerson('');
-    }
+    setPerson('');
+    setAddress('');
+    setPhone('');
     e.preventDefault();
   }
 
-  // this acts as a check to ensure that no blank submissions are accepted
-  
   return (
     <form onSubmit={handleSubmit}>
       <input type="text" 
-        placeholder="Add new contact" 
+        placeholder="Name" 
         onChange={handleChange} 
         value={person} />
-      <button type="submit">Add</button>
+      <button type="submit" onClick={addPerson}>Add</button>
+      <input type="text" 
+        placeholder="Address" 
+        onChange={handleAddChange} 
+        value={address} />
+      <button type="submit" onClick={addAddress}>Add</button>
+      <input type="text" 
+        placeholder="Phone" 
+        onChange={handlePnumChange} 
+        value={phone} />
+      <button type="submit" onClick={addNumber}>Add</button>
     </form>
   );
 }
 
 function PeopleList(props) {
-  const arr = props.data;
-  const listItems = arr.map((val, index) =>
+  const arr = props.names;
+  const arr2 = props.address;
+  const arr3 = props.phone;
+  const Names = arr.map((val, index) =>
     <li key={index}>{val}</li>
   );
-  return <ul>{listItems}</ul>;
+  const Address = arr2.map((val, index) =>
+  <li key={index}>{val}</li>)
+  const Phone = arr3.map((val, index) =>
+  <li key={index}> {val}</li>)
+  return <div className="mytable">
+    <h2>Name</h2>
+    <ul className="cells">{Names}</ul>
+    <h2>Address</h2> 
+    <ul className="row">{Address}</ul>
+    <h2>Phone Number</h2>
+    <ul className="row">{Phone}</ul>
+  </div>;
 }
 
-// To accomplish adding a new contact to our PeopleList when the form is submitted,  we need to share the state between the components. 
-// We can do that by lifting the state up to a parent component. This means that the parent component will hold the data that needs to be shared between the components. 
-// The ContactManager component receives the initial contacts list using props, saves it in its state. Then it passes down the contacts list to its child component.
-
 function ContactManager(props) {
-  const [contacts, setContacts] = useState(props.data);
+  const [names, setNames] = useState(props.name);
+  const [address, setAdd] = useState(props.add);
+  const [numbers, setPhone] = useState(props.pnum)
 
-  // like we passed down data using props, React allows us to pass down function references allowing us to access the earlier functions and alter them. Using that we create an addPerson() function to our ContactManager component to add a new person to our contacts state array
-
-  function addPerson(name) {
-    setContacts([...contacts, name]);
+  function addPerson(name){
+    setNames([...names, name])
   }
 
-  //Similar to passing the contacts list to our PeopleList component, we passed down the addPerson() function to our AddPersonForm using a prop called handleSubmit.
+  function addAddress(add){
+    setAdd([...address, add])
+  }
 
+  function addNumber(pnum){
+    setPhone([...numbers, pnum])
+  }
   return (
     <div>
-      <AddPersonForm handleSubmit={addPerson} />
-      <PeopleList data={contacts} />
+      <AddPersonForm addPerson={addPerson} addAddress={addAddress} addNumber={addNumber}/> 
+      <PeopleList names={names} address={address} phone={numbers} />
     </div>
   );
 }
 const contacts = ["James Smith", "Thomas Anderson", "Bruce Wayne"];
+const address = ["24 Garvston Road", "321 Maravichko Place", "One Wayne Manor"];
+const numbers = [2073457682, 3460902432, 4398099786];
 
 ReactDOM.render(
-  <ContactManager data={contacts} />, 
+  <ContactManager name={contacts} add={address} pnum={numbers} />, 
   document.getElementById('root')
 );
